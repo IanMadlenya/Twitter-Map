@@ -1,0 +1,41 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script type="text/javascript">
+	function getTweet(){
+		var keyword = "City";
+		var lat = 53.09274181;
+		var lng = -2.10834761;
+		var radius = 100;
+        $.ajax({
+             url: 'retrieveTweets.php',
+             type: 'POST',
+			 data: {keyword: keyword, lat: lat, lng:lng, radius: radius}
+        }).done(function(msg) {
+        	processTweet(msg);
+        });
+	}
+
+	function processTweet(json){
+		console.log(JSON.parse(json));
+
+		var obj = JSON.parse(json);
+		var tweetlength = obj.statuses.length;
+		var tweetdata = "<ul>";
+		for(var i = 0; i < tweetlength; i ++) {
+			tweetdata += "<li>"+obj.statuses[i].user.name + " <br> "+obj.statuses[i].geo.coordinates[0]+ " , "+obj.statuses[i].geo.coordinates[1]+"<br>"+obj.statuses[i].text+"</li>";
+		}
+		tweetdata += "</ul>";
+		document.getElementById("tweets").innerHTML = tweetdata;
+	}
+	</script>
+</head>
+<body>
+<input type="button" value="Get Tweet" onClick="getTweet()">
+
+<span id="tweets"></span>
+
+</body>
+</html>

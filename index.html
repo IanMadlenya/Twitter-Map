@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Tweet Map - FAHAD AL RABBANI</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #panel {
+        position: absolute;
+        bottom: 0px;
+        left: 15%;
+        margin-left: -133px;
+        z-index: 8;
+        background-color: rgba(117, 121, 128, 0.6);
+        padding: 16.5px;
+        font-family: Roboto;
+        font-size: 15px;
+      }
+
+      #address,#keyword{
+        background-color: #fff;
+        padding: 0 11px 0 13px;
+        width: 300px;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        text-overflow: ellipsis;
+      }
+
+      #address:focus,#keyword:focus {
+        border-color: #4d90fe;
+        margin-left: -1px;
+        padding-left: 14px;
+        width: 310px;
+      }
+
+      input[type=button]{
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        background-color: #4d90fe;
+        border-bottom: 3px solid #8DB8FD;
+        color: white;
+      }
+
+      input[type=button]:active {
+        transform: translate(0px,5px);
+        -webkit-transform: translate(0px,5px);
+        border-bottom: 1px solid;
+      }
+
+      .animate
+      {
+        transition: all 0.01s;
+        -webkit-transition: all 0.1s;
+      }
+
+      #tweetcount {
+          width:200px;
+          height:20px;
+          z-index: 99;
+          height:auto;
+          position:absolute;
+          left:50%;
+          margin-left:-100px;
+          bottom:50px;
+          background-color: #383838;
+          color: #F0F0F0;
+          font-family: Roboto;
+          font-size: 20px;
+          padding:10px;
+          text-align:center;
+          border-radius: 2px;
+          -webkit-box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+          -moz-box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+          box-shadow: 0px 0px 24px -1px rgba(56, 56, 56, 1);
+      }
+
+    </style>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?AIzaSyB87Ljm8yoKdfzBy3HG4pionD38lefwo64"></script>
+    <script>
+
+      var geocoder;
+      var map;
+      var userLat;
+      var userLng;
+      var defaultCoords = new google.maps.LatLng(47.398349 , -123.398437);
+      var tweetObjects = [];
+      var markers = new Array();
+
+        function initialize() {
+          geocoder = new google.maps.Geocoder();
+
+              var mapOptions = {
+                zoom: 9,
+                center: defaultCoords
+              }
+        
+          map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        }
+
+        function processTweet(json){
+              console.log(JSON.parse(json));
+              var obj = JSON.parse(json);
+              var tweetlength = obj.statuses.length;
+
+                if (tweetlength == 0){
+                  document.getElementById("tweetcount").innerHTML = "0 tweets retrieved.";
+                  $('#tweetcount').stop().fadeIn(400).delay(3000).fadeOut(400);
+
+                } else {
+
+                  for(var i = 0; i < tweetlength; i ++) {
+                    var name = String(obj.statuses[i].user.name);
+                    var text = String(obj.statuses[i].text);
+                    var lat = String(obj.statuses[i].geo.coordinates[0]);
+                    var lng = String(obj.statuses[i].geo.coordinates[1]);
+                    var screenname = String(obj.statuses[i].user.screen_name);
+                    var date = String(obj.statuses[i].created_at);
+                    var place = String(obj.statuses[i].place.full_name);
+                    tweetObjects.push(createArray(name,text,lat,lng,screenname,date,place));
+                       
+                  }
+                  displayMarkers();
+                  document.getElementById("tweetcount").innerHTML = tweetlength + " tweets retrieved.";
+                  $('#tweetcount').stop().fadeIn(400).delay(3000).fadeOut(400);
+                  for(var i=0; i < tweetObjects.length;i++){
+                    console.log(tweetObjects[i][0] + " "+tweetObjects[i][1]);
+                  }
+            }
+        }
+
+        function createArray(name,text,lat,lng,screenname,date,place){
+          var tweetsArray = [name,text,lat,lng,screenname,date,place];
+          return tweetsArray;
+        }
+
+        function codeAddress() {
+          var address = document.getElementById('address').value;
+          var keyword = document.getElementById('keyword').value;
+          var radius = document.getElementById("radius").value;
+          var result_type = document.getElementById("resulttype").value;
+          
+          geocoder.geocode( { 'address': address}, function(results, status) {
+
+            if (status == google.maps.GeocoderStatus.OK) {
+              var lat = results[0].geometry.location.lat();
+              var lng = results[0].geometry.location.lng()
+              
+              $.ajax({
+                     url: 'retrieveTweets.php',
+                     type: 'POST',
+               data: {keyword: keyword, lat: lat, lng:lng, radius: radius, result_type: result_type}
+                }).done(function(resultjson) {
+                  //console.log(resultjson);
+                  processTweet(resultjson);
+                });
+              
+              map.panTo(results[0].geometry.location);
+
+            } else {
+              alert('Geocode was not successful for the following reason: ' + status);
+            }
+          });
+        }
+        
+        function displayMarkers() {
+            var infowindow = new google.maps.InfoWindow();
+
+            var marker, i;
+
+            for (i = 0; i < tweetObjects.length; i++) {  
+                marker = new google.maps.Marker({
+                position: new google.maps.LatLng(tweetObjects[i][2], tweetObjects[i][3]),
+                Icon : 'Twitter_bird_icon.png',
+                map: map
+              });
+
+              markers.push(marker);
+
+              google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                return function() {
+                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetObjects[i][4]+"\">"+tweetObjects[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetObjects[i][4]+"</b>  <br>  Tweet: "+tweetObjects[i][1]+ "<br> Posted: "+ tweetObjects[i][5]+"<br> Place: "+tweetObjects[i][6] +"</p>");
+                  infowindow.open(map, marker);
+                }
+              })(marker, i));
+            }
+
+        }
+
+        function deleteMarkers() {
+          for (var i = 0; i < markers.length; i++ ) {
+            markers[i].setMap(null);
+          }
+          markers.length = 0;
+          tweetObjects = [];
+        }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="tweetcount" style="display:none"></div>
+    <div id="panel">
+      <input id="address" type="textbox" value="" placeholder="Location">
+      
+      <input id="keyword" type="textbox" value="" placeholder="Keyword">
+      Radius
+      <select id="radius">
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="150">150</option>
+        <option value="200">200</option>
+      </select>
+
+      Result Type
+      <select id="resulttype">
+        <option value="recent">recent</option>
+        <option value="popular">popular</option>
+        <option value="mixed">mixed</option>
+      </select>
+
+      <input class="animate" type="button" value="Get Tweets" onclick="codeAddress()">
+
+      <input class="animate" onclick="deleteMarkers();" type=button value="Remove Tweets">
+
+    </div>
+    <div id="map-canvas"></div>
+  </body>
+</html>
