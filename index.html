@@ -91,7 +91,7 @@
       var userLat;
       var userLng;
       var defaultCoords = new google.maps.LatLng(47.398349 , -123.398437);
-      var tweetObjects = [];
+      var tweetArrays = [];
       var markers = new Array();
 
         function initialize() {
@@ -106,6 +106,7 @@
         }
 
         function processTweet(json){
+            
               console.log(JSON.parse(json));
               var obj = JSON.parse(json);
               var tweetlength = obj.statuses.length;
@@ -117,35 +118,35 @@
                 } else {
 
                   for(var i = 0; i < tweetlength; i ++) {
-                    //var name = String(obj.statuses[i].user.name);
-                    //var text = String(obj.statuses[i].text);
-                    //var lat = String(obj.statuses[i].geo.coordinates[0]);
-                    //var lng = String(obj.statuses[i].geo.coordinates[1]);
-                    //var screenname = String(obj.statuses[i].user.screen_name);
-                    //var date = String(obj.statuses[i].created_at);
-                    //var place = String(obj.statuses[i].place.full_name);
-                    //tweetObjects.push(createArray(name,text,lat,lng,screenname,date,place));
-                    tweetObjects.push(createArray(String(obj.statuses[i].user.name),
+                    var name = String(obj.statuses[i].user.name);
+                    var text = String(obj.statuses[i].text);
+                    var lat = String(obj.statuses[i].geo.coordinates[0]);
+                    var lng = String(obj.statuses[i].geo.coordinates[1]);
+                    var screenname = String(obj.statuses[i].user.screen_name);
+                    var date = String(obj.statuses[i].created_at);
+                    var place = String(obj.statuses[i].place.full_name);
+                    tweetArrays.push(createArray(name,text,lat,lng,screenname,date,place));
+                    /*tweetArrays.push(createArray(String(obj.statuses[i].user.name),
                                                   String(obj.statuses[i].text),
                                                   String(obj.statuses[i].geo.coordinates[0]),
                                                   String(obj.statuses[i].geo.coordinates[1]),
                                                   String(obj.statuses[i].user.screen_name),
                                                   String(obj.statuses[i].created_at),
                                                   String(obj.statuses[i].place.full_name)
-                                                 )); 
+                                                 ));*/ 
                   }
                   displayMarkers();
                   document.getElementById("toastBox").innerHTML = tweetlength + " tweets retrieved.";
                   $('#toastBox').stop().fadeIn(400).delay(3000).fadeOut(400);
-                  for(var i=0; i < tweetObjects.length;i++){
-                    console.log(tweetObjects[i][0] + " "+tweetObjects[i][1]);
+                  for(var i=0; i < tweetArrays.length;i++){
+                    console.log(tweetArrays[i][0] + " "+tweetArrays[i][1]);
                   }
             }
         }
 
         function createArray(name,text,lat,lng,screenname,date,place){
-          var tweetsArray = [name,text,lat,lng,screenname,date,place];
-          return tweetsArray;
+          var defaultArray = [name,text,lat,lng,screenname,date,place];
+          return defaultArray;
         }
 
         function codeAddress() {
@@ -180,7 +181,7 @@
               }
             });
           }
-          
+
         }
         
         function displayMarkers() {
@@ -188,9 +189,9 @@
 
             var marker, i;
 
-            for (i = 0; i < tweetObjects.length; i++) {  
+            for (i = 0; i < tweetArrays.length; i++) {  
                 marker = new google.maps.Marker({
-                position: new google.maps.LatLng(tweetObjects[i][2], tweetObjects[i][3]),
+                position: new google.maps.LatLng(tweetArrays[i][2], tweetArrays[i][3]),
                 Icon : 'Twitter_bird_icon.png',
                 map: map
               });
@@ -199,7 +200,7 @@
 
               google.maps.event.addListener(marker, 'click', (function(marker, i) {
                 return function() {
-                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetObjects[i][4]+"\">"+tweetObjects[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetObjects[i][4]+"</b>  <br>  Tweet: "+tweetObjects[i][1]+ "<br> Posted: "+ tweetObjects[i][5]+"<br> Place: "+tweetObjects[i][6] +"</p>");
+                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"\" target=\"_blank\">"+tweetArrays[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetArrays[i][4]+"</b>  <br>  Tweet: "+tweetArrays[i][1]+ "<br> Posted: "+ tweetArrays[i][5]+"<br> Place: "+tweetArrays[i][6] +"</p>");
                   infowindow.open(map, marker);
                 }
               })(marker, i));
@@ -212,7 +213,8 @@
             markers[i].setMap(null);
           }
           markers.length = 0;
-          tweetObjects = [];
+          tweetArrays = [];
+          console.log(tweetArrays)
         }
 
         function checkAddressField(field) {
