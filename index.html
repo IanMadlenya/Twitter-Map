@@ -60,7 +60,7 @@
         -webkit-transition: all 0.1s;
       }
 
-      #tweetcount {
+      #toastBox {
           width:200px;
           height:20px;
           z-index: 99;
@@ -111,25 +111,32 @@
               var tweetlength = obj.statuses.length;
 
                 if (tweetlength == 0){
-                  document.getElementById("tweetcount").innerHTML = "0 tweets retrieved.";
-                  $('#tweetcount').stop().fadeIn(400).delay(3000).fadeOut(400);
+                  document.getElementById("toastBox").innerHTML = "0 tweets retrieved.";
+                  $('#toastBox').stop().fadeIn(400).delay(3000).fadeOut(400);
 
                 } else {
 
                   for(var i = 0; i < tweetlength; i ++) {
-                    var name = String(obj.statuses[i].user.name);
-                    var text = String(obj.statuses[i].text);
-                    var lat = String(obj.statuses[i].geo.coordinates[0]);
-                    var lng = String(obj.statuses[i].geo.coordinates[1]);
-                    var screenname = String(obj.statuses[i].user.screen_name);
-                    var date = String(obj.statuses[i].created_at);
-                    var place = String(obj.statuses[i].place.full_name);
-                    tweetObjects.push(createArray(name,text,lat,lng,screenname,date,place));
-                       
+                    //var name = String(obj.statuses[i].user.name);
+                    //var text = String(obj.statuses[i].text);
+                    //var lat = String(obj.statuses[i].geo.coordinates[0]);
+                    //var lng = String(obj.statuses[i].geo.coordinates[1]);
+                    //var screenname = String(obj.statuses[i].user.screen_name);
+                    //var date = String(obj.statuses[i].created_at);
+                    //var place = String(obj.statuses[i].place.full_name);
+                    //tweetObjects.push(createArray(name,text,lat,lng,screenname,date,place));
+                    tweetObjects.push(createArray(String(obj.statuses[i].user.name),
+                                                  String(obj.statuses[i].text),
+                                                  String(obj.statuses[i].geo.coordinates[0]),
+                                                  String(obj.statuses[i].geo.coordinates[1]),
+                                                  String(obj.statuses[i].user.screen_name),
+                                                  String(obj.statuses[i].created_at),
+                                                  String(obj.statuses[i].place.full_name)
+                                                 )); 
                   }
                   displayMarkers();
-                  document.getElementById("tweetcount").innerHTML = tweetlength + " tweets retrieved.";
-                  $('#tweetcount').stop().fadeIn(400).delay(3000).fadeOut(400);
+                  document.getElementById("toastBox").innerHTML = tweetlength + " tweets retrieved.";
+                  $('#toastBox').stop().fadeIn(400).delay(3000).fadeOut(400);
                   for(var i=0; i < tweetObjects.length;i++){
                     console.log(tweetObjects[i][0] + " "+tweetObjects[i][1]);
                   }
@@ -142,32 +149,38 @@
         }
 
         function codeAddress() {
-          var address = document.getElementById('address').value;
-          var keyword = document.getElementById('keyword').value;
-          var radius = document.getElementById("radius").value;
-          var result_type = document.getElementById("resulttype").value;
+
+          if (document.getElementById("address").value == "" || document.getElementById("address").value == null) {
+            checkAddressField(document.getElementById("address"));
+          } else {
+
+            var address = document.getElementById('address').value;
+            var keyword = document.getElementById('keyword').value;
+            var radius = document.getElementById("radius").value;
+            var result_type = document.getElementById("resulttype").value;
+            
+            geocoder.geocode( { 'address': address}, function(results, status) {
+
+              if (status == google.maps.GeocoderStatus.OK) {
+                var lat = results[0].geometry.location.lat();
+                var lng = results[0].geometry.location.lng()
+                
+                $.ajax({
+                       url: 'retrieveTweets.php',
+                       type: 'POST',
+                 data: {keyword: keyword, lat: lat, lng:lng, radius: radius, result_type: result_type}
+                  }).done(function(resultjson) {
+                    processTweet(resultjson);
+                  });
+                
+                map.panTo(results[0].geometry.location);
+
+              } else {
+                alert('Geocode was not successful for the following reason: ' + status);
+              }
+            });
+          }
           
-          geocoder.geocode( { 'address': address}, function(results, status) {
-
-            if (status == google.maps.GeocoderStatus.OK) {
-              var lat = results[0].geometry.location.lat();
-              var lng = results[0].geometry.location.lng()
-              
-              $.ajax({
-                     url: 'retrieveTweets.php',
-                     type: 'POST',
-               data: {keyword: keyword, lat: lat, lng:lng, radius: radius, result_type: result_type}
-                }).done(function(resultjson) {
-                  //console.log(resultjson);
-                  processTweet(resultjson);
-                });
-              
-              map.panTo(results[0].geometry.location);
-
-            } else {
-              alert('Geocode was not successful for the following reason: ' + status);
-            }
-          });
         }
         
         function displayMarkers() {
@@ -202,16 +215,23 @@
           tweetObjects = [];
         }
 
+        function checkAddressField(field) {
+            if (field.value == '') {
+                document.getElementById("toastBox").innerHTML = "Location cannot be empty.";
+                $('#toastBox').stop().fadeIn(400).delay(3000).fadeOut(400);
+            }
+        }
+
       google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
   </head>
   <body>
-    <div id="tweetcount" style="display:none"></div>
+    <div id="toastBox" style="display:none"></div>
     <div id="panel">
-      <input id="address" type="textbox" value="" placeholder="Location">
+      <input id="address" type="textbox" value="" placeholder="Location" onblur="checkAddressField(this);">
       
-      <input id="keyword" type="textbox" value="" placeholder="Keyword">
+      <input id="keyword" type="textbox" value="" placeholder="Keyword(Optional)">
       Radius
       <select id="radius">
         <option value="50">50</option>
