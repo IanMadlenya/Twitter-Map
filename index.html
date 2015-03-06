@@ -106,8 +106,6 @@
         }
 
         function processTweet(json){
-            
-          console.log(JSON.parse(json));
           var obj = JSON.parse(json);
           var tweetlength = obj.statuses.length;
 
@@ -126,14 +124,6 @@
                     var date = String(obj.statuses[i].created_at);
                     var place = String(obj.statuses[i].place.full_name);
                     tweetArrays.push(createArray(name,text,lat,lng,screenname,date,place));
-                    /*tweetArrays.push(createArray(String(obj.statuses[i].user.name),
-                                                  String(obj.statuses[i].text),
-                                                  String(obj.statuses[i].geo.coordinates[0]),
-                                                  String(obj.statuses[i].geo.coordinates[1]),
-                                                  String(obj.statuses[i].user.screen_name),
-                                                  String(obj.statuses[i].created_at),
-                                                  String(obj.statuses[i].place.full_name)
-                                                 ));*/ 
                   }
                   displayMarkers();
                   document.getElementById("toastBox").innerHTML = tweetlength + " tweets retrieved.";
@@ -214,7 +204,6 @@
           }
           markers.length = 0;
           tweetArrays = [];
-          console.log(tweetArrays)
         }
 
         function checkAddressField(field) {
