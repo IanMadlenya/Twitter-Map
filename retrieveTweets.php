@@ -16,7 +16,7 @@ $settings = array(
 );
 //https://api.twitter.com/1.1/search/tweets.json?q=superbowl&geocode=47.439090,-122.299118,100km&count=100&result_type=recent
 $url = 'https://api.twitter.com/1.1/search/tweets.json';
-$getfield = '?q='.$keyword.'&geocode='.$lat.','.$lng.','.$radius.'km&count=100&result_type='.$result_type;
+$getfield = '?q='.$keyword.'&geocode='.$lat.','.$lng.','.$radius.'km&count=200&result_type='.$result_type;
 $requestMethod = 'GET';
 
 $twitter = new TwitterAPIExchange($settings);
