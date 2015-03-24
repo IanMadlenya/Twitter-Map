@@ -107,6 +107,7 @@
 
         function processTweet(json){
           var obj = JSON.parse(json);
+          console.log(JSON.parse(json));
           var tweetlength = obj.statuses.length;
 
             if (tweetlength == 0){
@@ -123,7 +124,8 @@
                     var screenname = String(obj.statuses[i].user.screen_name);
                     var date = String(obj.statuses[i].created_at);
                     var place = String(obj.statuses[i].place.full_name);
-                    tweetArrays.push(createArray(name,text,lat,lng,screenname,date,place));
+                    var idStr = obj.statuses[i].id_str;
+                    tweetArrays.push(createArray(name,text,lat,lng,screenname,date,place,idStr));
                   }
                   displayMarkers();
                   document.getElementById("toastBox").innerHTML = tweetlength + " tweets retrieved.";
@@ -134,8 +136,8 @@
             }
         }
 
-        function createArray(name,text,lat,lng,screenname,date,place){
-          var defaultArray = [name,text,lat,lng,screenname,date,place];
+        function createArray(name,text,lat,lng,screenname,date,place,idStr){
+          var defaultArray = [name,text,lat,lng,screenname,date,place,idStr];
           return defaultArray;
         }
 
@@ -190,7 +192,7 @@
 
               google.maps.event.addListener(marker, 'click', (function(marker, i) {
                 return function() {
-                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"\" target=\"_blank\">"+tweetArrays[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetArrays[i][4]+"</b>  <br>  Tweet: "+tweetArrays[i][1]+ "<br> Posted: "+ tweetArrays[i][5]+"<br> Place: "+tweetArrays[i][6] +"</p>");
+                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"\" target=\"_blank\">"+tweetArrays[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetArrays[i][4]+"</b>  <br>  Tweet: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"/status/"+tweetArrays[i][7]+"\" target=\"_blank\">"+tweetArrays[i][1]+"</a>  <br> Posted: "+ tweetArrays[i][5]+"<br> Place: "+tweetArrays[i][6] +"</p>");
                   infowindow.open(map, marker);
                 }
               })(marker, i));
