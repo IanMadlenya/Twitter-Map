@@ -192,7 +192,7 @@
 
               google.maps.event.addListener(marker, 'click', (function(marker, i) {
                 return function() {
-                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"\" target=\"_blank\">"+tweetArrays[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetArrays[i][4]+"</b>  <br>  Tweet: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"/status/"+tweetArrays[i][7]+"\" target=\"_blank\">"+tweetArrays[i][1]+"</a>  <br> Posted: "+ tweetArrays[i][5]+"<br> Place: "+tweetArrays[i][6] +"</p>");
+                  infowindow.setContent("<h4>Name: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"\" target=\"_blank\" title=\"Click here to see the profile\">"+tweetArrays[i][0] + "</a> </h4> <p>Screen Name: <b>@"+tweetArrays[i][4]+"</b>  <br>  Tweet: <a href=\"https://twitter.com/"+tweetArrays[i][4]+"/status/"+tweetArrays[i][7]+"\" target=\"_blank\" title=\"Click here to see the tweet in Twitter\">"+tweetArrays[i][1]+"</a>  <br> Posted: "+ tweetArrays[i][5]+"<br> Place: "+tweetArrays[i][6] +"</p>");
                   infowindow.open(map, marker);
                 }
               })(marker, i));
