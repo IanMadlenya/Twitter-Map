@@ -185,7 +185,8 @@
                 marker = new google.maps.Marker({
                 position: new google.maps.LatLng(tweetArrays[i][2], tweetArrays[i][3]),
                 Icon : 'Twitter_bird_icon.png',
-                map: map
+                map: map,
+                title: tweetArrays[i][4]
               });
 
               markers.push(marker);
