@@ -1,2 +1,3 @@
 # Geotagged tweets on Google Maps
- Query tweets by location and keyword
+This repository contains the code for the project.
+Download the code and push it to your server to run the code.
